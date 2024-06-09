@@ -1,43 +1,18 @@
 import numpy as np
+from optim_w import WOptimizer
 
 class AtasiNet : 
 	def __init__(self,A) -> None:
 		self.A = A
+		self.optimizer = WOptimizer(A)
 		return
 
-	def compute_W(self,max_iter=1000, tol=1e-6, alpha=0.01):
-		A = self.A
-		M, N = A.shape
-		W = np.random.rand(M, N) + 1j * np.random.rand(M, N)  # Initial guess
-		Lambda = np.zeros((M, N), dtype=complex)  # Lagrange multipliers
-
-		for iteration in range(max_iter):
-			W_prev = W.copy()
-
-			# Update W
-			for i in range(N):
-				A_i = A[:, i]
-				Lambda_i = Lambda[:, i]
-
-				# Gradient of the objective function
-				grad = 2 * (W.T @ A) @ A[:, i] + Lambda_i
-
-				# Update W column by column
-				W[:, i] -= alpha * grad
-				# Enforce the constraint
-				W[:, i] = W[:, i] / (np.dot(W[:, i], A_i.conj()) + 1e-10)  # Normalization to ensure constraint
-
-			# Update Lagrange multipliers
-			for i in range(N):
-				Lambda[:, i] += alpha * (np.dot(W[:, i].T, A[:, i]) - 1)
-
-			# Check convergence
-			if np.linalg.norm(W - W_prev) < tol:
-				print(f"Convergence reached after {iteration} iterations.")
-				break
-
-		return W
-
+	def compute_w(self,A = None) : 
+		if A == None : 
+			optimizer = self.optimizer
+		else : 
+			optimizer = WOptimizer(A)
+		return optimizer.minimize_pseudo_inverse()
 
 	def run_algorithm(self, y, A, mu, beta, K):
 		# Initialize variables
