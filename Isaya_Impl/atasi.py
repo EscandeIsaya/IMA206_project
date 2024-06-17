@@ -8,6 +8,10 @@ class AtasiNet :
 		self.W = None
 		return
 
+	def eta_threshold(self, z, theta):
+		return np.sign(z) * np.maximum(np.abs(z) - theta, 0)
+
+	
 	def compute_w(self,A = None) : 
 		if A == None : 
 			optimizer = self.optimizer
@@ -50,6 +54,33 @@ class AtasiNet :
 		# Final reflectivity profile
 		gamma = gamma_k
 		return gamma, theta_k
+
+	def train(self, Y, A, K, epochs, learning_rate=0.01):
+		# Initialize parameters to be learned
+		mu = np.random.rand(K)
+		beta = np.random.rand(K)
+		gamma_list = []
+
+
+		for epoch in range(epochs):
+			for y in Y:
+				gamma_k, theta_k = self.run_algorithm(y, A, mu, beta, K)
+				gamma_list.append(gamma_k)
+
+				# Compute gradients (this is a simplified approach)
+				grad_mu = (gamma_k - mu) / (np.abs(gamma_k) + 1e-5)
+				grad_beta = (gamma_k - beta) / (np.abs(gamma_k) + 1e-5)
+
+				# Update parameters
+				mu -= learning_rate * grad_mu
+				beta -= learning_rate * grad_beta
+
+				# Print out the current loss and parameters (optional)
+				loss = np.linalg.norm(A @ gamma_k - y)
+				print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss:.4f}, Mu: {mu}, Beta: {beta}")
+
+		gamma = np.mean(gamma_list, axis=0)
+		return mu, beta, gamma
 	
 	def __call__(self, y, A, mu, beta, K):
 		return self.run_algorithm(y, A, mu, beta, K)
