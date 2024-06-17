@@ -5,7 +5,7 @@ class AtasiNet :
 	def __init__(self,A) -> None:
 		self.A = A
 		self.optimizer = WOptimizer(A)
-		self.W 
+		self.W = None
 		return
 
 	def compute_w(self,A = None) : 
@@ -25,7 +25,10 @@ class AtasiNet :
 		D_0 = np.zeros_like(y)
 
 		# Pre-compute W
-		W = self.compute_W()
+		if self.W is None : 
+			W = self.compute_w()
+		else :
+			W = self.W
 
 		# Initialize variables for the loop
 		gamma_k = gamma_0
