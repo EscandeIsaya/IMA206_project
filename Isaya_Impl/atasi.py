@@ -5,6 +5,7 @@ class AtasiNet :
 	def __init__(self,A) -> None:
 		self.A = A
 		self.optimizer = WOptimizer(A)
+		self.W 
 		return
 
 	def compute_w(self,A = None) : 
@@ -12,7 +13,8 @@ class AtasiNet :
 			optimizer = self.optimizer
 		else : 
 			optimizer = WOptimizer(A)
-		return optimizer.minimize_pseudo_inverse()
+		self.W = optimizer.minimize_pseudo_inverse()
+		return self.W
 
 	def run_algorithm(self, y, A, mu, beta, K):
 		# Initialize variables
