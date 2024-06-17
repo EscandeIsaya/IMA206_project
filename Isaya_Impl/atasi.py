@@ -61,7 +61,6 @@ class AtasiNet :
 		beta = np.random.rand(K)
 		gamma_list = []
 
-
 		for epoch in range(epochs):
 			for y in Y:
 				gamma_k, theta_k = self.run_algorithm(y, A, mu, beta, K)
