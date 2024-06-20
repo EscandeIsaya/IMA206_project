@@ -2,7 +2,7 @@ import numpy as np
 from optim_w import WOptimizer
 
 class AtasiNet : 
-	def __init__(self,A,K=10,W=None) -> None:
+	def __init__(self,A,W=None,K=10,) -> None:
 		self.A = A
 		self.optimizer = WOptimizer(A)
 		self.W = W
@@ -62,8 +62,8 @@ class AtasiNet :
 		if A is None:
 			A = self.A
 		K = self.K
-		mu = 0.1*np.zeros(K)
-		beta = 0.01*np.zeros(K)
+		mu = 0.1*np.ones(K)
+		beta = 0.01*np.ones(K)
 		index=0
 
 		for epoch in range(epochs):
@@ -88,7 +88,7 @@ class AtasiNet :
 				mu -= learning_rate * grad_mu
 				beta -= learning_rate * grad_beta
 				if index % 100 == 0:
-					print(f"At epoch {epoch + 1}/{epochs}, index is {index}/{len(gamma_labels)} || loss is{loss} || gradients are mu {grad_mu} and beta {grad_beta}", end='\r')
+					print(f"At epoch {epoch + 1}/{epochs}, index is {index}/{len(gamma_labels)} || loss is{loss} ", end='\r')
 
 			# Print the current loss and parameters for monitoring
 			print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss:.4f}, Mu: {mu}, Beta: {beta}")
