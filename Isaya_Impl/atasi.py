@@ -36,6 +36,7 @@ class AtasiNet :
 
 		# Initialize variables for the loop
 		gamma_k = gamma_0
+		gamma_l = np.zeros((K,gamma_k.shape[0]))
 		D_k = D_0
 		k = 0
 
@@ -50,36 +51,48 @@ class AtasiNet :
 			theta_k = mu[k] / (np.abs(z_k) + epsilon)
 			# Update γk+1
 			gamma_k = self.eta_threshold(z_k, theta_k)
+			gamma_l[k]=gamma_k
 
 		# Final reflectivity profile
 		gamma = gamma_k
 		return gamma, theta_k
 
-	def train(self, Y, A, K, epochs, learning_rate=0.01):
-		# Initialize parameters to be learned
-		mu = np.random.rand(K)
-		beta = np.random.rand(K)
-		gamma_list = []
+	def train(self, Y, gamma_labels, epochs, A=None, learning_rate=0.01):
+		if A is None:
+			A = self.A
+		K = self.K
+		mu = self.mu
+		beta = self.beta
 
 		for epoch in range(epochs):
-			for y in Y:
+			for y, gamma_label in zip(Y, gamma_labels):
 				gamma_k, theta_k = self.run_algorithm(y, A, mu, beta, K)
-				gamma_list.append(gamma_k)
+                
+				# Compute loss using labels
+				loss = np.linalg.norm(gamma_k - gamma_label)
 
-				# Compute gradients (this is a simplified approach)
-				grad_mu = (gamma_k - mu) / (np.abs(gamma_k) + 1e-5)
-				grad_beta = (gamma_k - beta) / (np.abs(gamma_k) + 1e-5)
+				# Compute gradients using the loss
+				grad_mu = (gamma_k - mu) / (np.abs(gamma_k - gamma_label) + 1e-5)
+				grad_beta = (gamma_k - beta) / (np.abs(gamma_k - gamma_label) + 1e-5)
 
 				# Update parameters
 				mu -= learning_rate * grad_mu
 				beta -= learning_rate * grad_beta
 
-				# Print out the current loss and parameters (optional)
-				loss = np.linalg.norm(A @ gamma_k - y)
+				# Print the current loss and parameters for monitoring
 				print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss:.4f}, Mu: {mu}, Beta: {beta}")
 
-		gamma = np.mean(gamma_list, axis=0)
-		return mu, beta, gamma
+		self.mu = mu
+		self.beta = beta
+
+	def predict(self, y, A=None):
+		if A is None:
+			A = self.A
+		K = self.K
+		mu = self.mu
+		beta = self.beta
+		gamma_k, _ = self.run_algorithm(y, A, mu, beta, K)
+		return gamma_k
 	
-	def __call__(self, y, A, mu, beta, K):
-		return self.run_algorithm(y, A, mu, beta, K)
+	def __call__(self, y, A=None):
+		return self.predict(y,A)
