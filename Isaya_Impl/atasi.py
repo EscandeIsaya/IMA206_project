@@ -64,9 +64,12 @@ class AtasiNet :
 		K = self.K
 		mu = 0.1*np.zeros(K)
 		beta = 0.01*np.zeros(K)
+		index=0
 
 		for epoch in range(epochs):
+			index=0
 			for y, gamma_label in zip(Y, gamma_labels):
+				index += 1
 				gamma_k = self.run_algorithm(y, A, mu, beta, K)
                 
 				# Compute loss using labels
@@ -84,6 +87,8 @@ class AtasiNet :
 				# Update parameters
 				mu -= learning_rate * grad_mu
 				beta -= learning_rate * grad_beta
+				if index % 100 == 0:
+					print(f"At epoch {epoch + 1}/{epochs}, index is {index}/{len(gamma_labels)} || loss is{loss} || gradients are mu {grad_mu} and beta {grad_beta}", end='\r')
 
 			# Print the current loss and parameters for monitoring
 			print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss:.4f}, Mu: {mu}, Beta: {beta}")
